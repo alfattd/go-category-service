@@ -14,6 +14,10 @@ func (c *Config) Validate() error {
 		return err
 	}
 
+	if err := required(c.RabbitMQUrl, "RABBITMQ_URL"); err != nil {
+		return err
+	}
+
 	if c.ServiceVersion != "dev" {
 
 		if err := required(c.DBHost, "DB_HOST"); err != nil {

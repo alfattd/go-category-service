@@ -7,6 +7,8 @@ type Config struct {
 	ServiceName    string
 	ServiceVersion string
 
+	RabbitMQUrl string
+
 	DBHost     string
 	DBPort     string
 	DBUser     string
@@ -20,6 +22,8 @@ func Load() *Config {
 		AppPort:        os.Getenv("APP_PORT"),
 		ServiceName:    os.Getenv("SERVICE_NAME"),
 		ServiceVersion: os.Getenv("SERVICE_VERSION"),
+
+		RabbitMQUrl: os.Getenv("RABBITMQ_URL"),
 
 		DBHost:     os.Getenv("DB_HOST"),
 		DBPort:     os.Getenv("DB_PORT"),

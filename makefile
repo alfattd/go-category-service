@@ -1,7 +1,7 @@
-db_url=postgres://$(user):$(password)@localhost:5432/$(db)?sslmode=disable
+db_url=postgres://$(user):$(password)@localhost:5432/$(name)?sslmode=disable
 
 migrate-create:
-	migrate create -ext sql -dir postgres/migrations -seq create_$(name)_table
+	migrate create -ext sql -dir postgres/migrations -seq create_$(table)_table
 
 migrate-up:
 	migrate -path postgres/migrations -database "$(db_url)" up

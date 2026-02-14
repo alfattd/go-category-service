@@ -7,6 +7,7 @@ import (
 	"github.com/alfattd/crud/internal/platform/config"
 	"github.com/alfattd/crud/internal/platform/database"
 	"github.com/alfattd/crud/internal/platform/monitor"
+	"github.com/alfattd/crud/internal/platform/rabbitmq"
 	"github.com/alfattd/crud/internal/repository"
 	"github.com/alfattd/crud/internal/repository/memory"
 	"github.com/alfattd/crud/internal/repository/postgres"
@@ -28,7 +29,12 @@ func New(cfg *config.Config) *http.Server {
 
 	categoryService := service.NewCategoryService(categoryRepo)
 
-	categoryHandler := handler.NewCategoryHandler(categoryService)
+	publisher, err := rabbitmq.NewPublisher(cfg.RabbitMQUrl, "category_events")
+	if err != nil {
+		panic(err)
+	}
+
+	categoryHandler := handler.NewCategoryHandler(categoryService, publisher)
 
 	mux.HandleFunc("/health", monitor.Health)
 	mux.HandleFunc("/version", monitor.Version(cfg.ServiceName, cfg.ServiceVersion))
