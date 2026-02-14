@@ -9,7 +9,7 @@ import (
 
 	"log/slog"
 
-	"github.com/alfattd/crud/internal/server"
+	"github.com/alfattd/category-service/internal/server"
 )
 
 func main() {

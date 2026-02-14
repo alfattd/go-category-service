@@ -3,7 +3,7 @@ package server
 import (
 	"net/http"
 
-	"github.com/alfattd/crud/internal/platform/monitor"
+	"github.com/alfattd/category-service/internal/platform/monitor"
 )
 
 func MetricsMiddleware(next http.Handler) http.Handler {

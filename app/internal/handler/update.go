@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/alfattd/crud/internal/dto"
-	"github.com/alfattd/crud/internal/platform/rabbitmq"
-	"github.com/alfattd/crud/internal/repository"
+	"github.com/alfattd/category-service/internal/dto"
+	"github.com/alfattd/category-service/internal/platform/rabbitmq"
+	"github.com/alfattd/category-service/internal/repository"
 )
 
 func (h *CategoryHandler) UpdateCategory(w http.ResponseWriter, r *http.Request) {

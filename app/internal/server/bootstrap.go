@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/alfattd/crud/internal/platform/config"
-	"github.com/alfattd/crud/internal/platform/logger"
-	"github.com/alfattd/crud/internal/platform/monitor"
+	"github.com/alfattd/category-service/internal/platform/config"
+	"github.com/alfattd/category-service/internal/platform/logger"
+	"github.com/alfattd/category-service/internal/platform/monitor"
 )
 
 func Run() (*config.Config, *http.Server) {

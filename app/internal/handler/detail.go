@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/alfattd/crud/internal/dto"
-	"github.com/alfattd/crud/internal/repository"
+	"github.com/alfattd/category-service/internal/dto"
+	"github.com/alfattd/category-service/internal/repository"
 )
 
 func (h *CategoryHandler) GetCategoryByID(w http.ResponseWriter, r *http.Request) {

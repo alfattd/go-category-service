@@ -1,6 +1,6 @@
 package repository
 
-import "github.com/alfattd/crud/internal/model"
+import "github.com/alfattd/category-service/internal/model"
 
 type CategoryRepository interface {
 	Create(*model.Category) error

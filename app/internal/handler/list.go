@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/alfattd/crud/internal/dto"
+	"github.com/alfattd/category-service/internal/dto"
 )
 
 func (h *CategoryHandler) ListCategory(w http.ResponseWriter, r *http.Request) {

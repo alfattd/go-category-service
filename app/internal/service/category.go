@@ -3,9 +3,9 @@ package service
 import (
 	"time"
 
-	"github.com/alfattd/crud/internal/dto"
-	"github.com/alfattd/crud/internal/model"
-	"github.com/alfattd/crud/internal/repository"
+	"github.com/alfattd/category-service/internal/dto"
+	"github.com/alfattd/category-service/internal/model"
+	"github.com/alfattd/category-service/internal/repository"
 
 	"github.com/google/uuid"
 )

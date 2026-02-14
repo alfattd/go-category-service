@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"github.com/alfattd/crud/internal/platform/rabbitmq"
-	"github.com/alfattd/crud/internal/service"
+	"github.com/alfattd/category-service/internal/platform/rabbitmq"
+	"github.com/alfattd/category-service/internal/service"
 )
 
 type CategoryHandler struct {

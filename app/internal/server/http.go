@@ -3,15 +3,15 @@ package server
 import (
 	"net/http"
 
-	"github.com/alfattd/crud/internal/handler"
-	"github.com/alfattd/crud/internal/platform/config"
-	"github.com/alfattd/crud/internal/platform/database"
-	"github.com/alfattd/crud/internal/platform/monitor"
-	"github.com/alfattd/crud/internal/platform/rabbitmq"
-	"github.com/alfattd/crud/internal/repository"
-	"github.com/alfattd/crud/internal/repository/memory"
-	"github.com/alfattd/crud/internal/repository/postgres"
-	"github.com/alfattd/crud/internal/service"
+	"github.com/alfattd/category-service/internal/handler"
+	"github.com/alfattd/category-service/internal/platform/config"
+	"github.com/alfattd/category-service/internal/platform/database"
+	"github.com/alfattd/category-service/internal/platform/monitor"
+	"github.com/alfattd/category-service/internal/platform/rabbitmq"
+	"github.com/alfattd/category-service/internal/repository"
+	"github.com/alfattd/category-service/internal/repository/memory"
+	"github.com/alfattd/category-service/internal/repository/postgres"
+	"github.com/alfattd/category-service/internal/service"
 )
 
 func New(cfg *config.Config) *http.Server {

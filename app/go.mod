@@ -1,5 +1,4 @@
-module github.com/alfattd/crud
-
+module github.com/alfattd/category-service
 go 1.25.6
 
 require (

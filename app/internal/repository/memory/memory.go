@@ -3,8 +3,8 @@ package memory
 import (
 	"sync"
 
-	"github.com/alfattd/crud/internal/model"
-	"github.com/alfattd/crud/internal/repository"
+	"github.com/alfattd/category-service/internal/model"
+	"github.com/alfattd/category-service/internal/repository"
 )
 
 type InMemoryCategoryRepo struct {
