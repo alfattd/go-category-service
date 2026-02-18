@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/alfattd/category-service/internal/domain"
-	"github.com/alfattd/category-service/internal/pkg/requestid"
+	"github.com/alfattd/category-service/internal/pkg/middleware"
 	"github.com/google/uuid"
 )
 
@@ -31,7 +31,7 @@ func (s *CategoryService) Create(ctx context.Context, name string) (*domain.Cate
 		s.log.Error("failed to publish category_created event",
 			"error", err,
 			"id", category.ID,
-			"request_id", requestid.FromContext(ctx),
+			"request_id", middleware.RequestIDFromContext(ctx),
 		)
 	}
 
@@ -59,7 +59,7 @@ func (s *CategoryService) Update(ctx context.Context, id, name string) (*domain.
 		s.log.Error("failed to publish category_updated event",
 			"error", err,
 			"id", category.ID,
-			"request_id", requestid.FromContext(ctx),
+			"request_id", middleware.RequestIDFromContext(ctx),
 		)
 	}
 
@@ -79,7 +79,7 @@ func (s *CategoryService) Delete(ctx context.Context, id string) error {
 		s.log.Error("failed to publish category_deleted event",
 			"error", err,
 			"id", id,
-			"request_id", requestid.FromContext(ctx),
+			"request_id", middleware.RequestIDFromContext(ctx),
 		)
 	}
 

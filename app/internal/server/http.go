@@ -9,9 +9,9 @@ import (
 	"github.com/alfattd/category-service/internal/handler"
 	"github.com/alfattd/category-service/internal/pkg/config"
 	"github.com/alfattd/category-service/internal/pkg/database"
-	"github.com/alfattd/category-service/internal/pkg/monitor"
+	"github.com/alfattd/category-service/internal/pkg/middleware"
 	"github.com/alfattd/category-service/internal/pkg/rabbitmq"
-	"github.com/alfattd/category-service/internal/pkg/requestid"
+	"github.com/alfattd/category-service/internal/pkg/system"
 	"github.com/alfattd/category-service/internal/repository"
 	"github.com/alfattd/category-service/internal/service"
 )
@@ -42,9 +42,8 @@ func New(cfg *config.Config, log *slog.Logger) (*http.Server, func()) {
 	categoryService := service.NewCategoryService(categoryRepo, publisher, log)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
 
-	mux.HandleFunc("/health", monitor.Health)
-	mux.HandleFunc("/version", monitor.Version(cfg.ServiceName, cfg.ServiceVersion))
-	mux.Handle("/metrics", monitor.MetricsHandler())
+	mux.HandleFunc("/health", system.Health)
+	mux.HandleFunc("/version", system.Version(cfg.ServiceName, cfg.ServiceVersion))
 
 	mux.HandleFunc("GET /categories", categoryHandler.List)
 	mux.HandleFunc("POST /categories", categoryHandler.Create)
@@ -52,11 +51,11 @@ func New(cfg *config.Config, log *slog.Logger) (*http.Server, func()) {
 	mux.HandleFunc("PUT /categories/{id}", categoryHandler.Update)
 	mux.HandleFunc("DELETE /categories/{id}", categoryHandler.Delete)
 
-	h := requestid.Middleware(
-		LoggingMiddleware(log,
-			MetricsMiddleware(mux),
-		),
-	)
+	h := middleware.Chain(
+		middleware.RequestID,
+		middleware.Recovery(log),
+		middleware.Logging(log),
+	)(mux)
 
 	srv := &http.Server{
 		Addr:         ":" + cfg.AppPort,

@@ -1,4 +1,4 @@
-package monitor
+package system
 
 import (
 	"encoding/json"

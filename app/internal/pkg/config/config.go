@@ -1,49 +1,29 @@
 package config
 
-import "os"
-
-type Config struct {
+type Base struct {
 	AppPort        string
 	ServiceName    string
 	ServiceVersion string
-
-	RabbitMQUrl string
-
-	DBHost     string
-	DBPort     string
-	DBUser     string
-	DBPassword string
-	DBName     string
-	DBSSLMode  string
 }
 
-func Load() *Config {
-	sslMode := os.Getenv("DB_SSLMODE")
-	if sslMode == "" {
-		sslMode = "disable"
-	}
-
-	return &Config{
-		AppPort:        os.Getenv("APP_PORT"),
-		ServiceName:    os.Getenv("SERVICE_NAME"),
-		ServiceVersion: os.Getenv("SERVICE_VERSION"),
-
-		RabbitMQUrl: os.Getenv("RABBITMQ_URL"),
-
-		DBHost:     os.Getenv("DB_HOST"),
-		DBPort:     os.Getenv("DB_PORT"),
-		DBName:     os.Getenv("DB_NAME"),
-		DBUser:     os.Getenv("DB_USER"),
-		DBPassword: os.Getenv("DB_PASSWORD"),
-		DBSSLMode:  sslMode,
+func LoadBase() Base {
+	return Base{
+		AppPort:        Env("APP_PORT", "80"),
+		ServiceName:    Env("SERVICE_NAME", ""),
+		ServiceVersion: Env("SERVICE_VERSION", ""),
 	}
 }
 
-func (c *Config) DBUrl() string {
-	return "host=" + c.DBHost +
-		" port=" + c.DBPort +
-		" dbname=" + c.DBName +
-		" user=" + c.DBUser +
-		" password=" + c.DBPassword +
-		" sslmode=" + c.DBSSLMode
+func (b Base) ValidateBase() error {
+	fields := []struct{ value, name string }{
+		{b.AppPort, "APP_PORT"},
+		{b.ServiceName, "SERVICE_NAME"},
+		{b.ServiceVersion, "SERVICE_VERSION"},
+	}
+	for _, f := range fields {
+		if err := Required(f.value, f.name); err != nil {
+			return err
+		}
+	}
+	return nil
 }

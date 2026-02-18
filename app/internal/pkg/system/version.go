@@ -1,11 +1,11 @@
-package monitor
+package system
 
 import (
 	"encoding/json"
 	"net/http"
 )
 
-type VersionResponse struct {
+type versionResponse struct {
 	Service string `json:"service"`
 	Version string `json:"version"`
 }
@@ -13,7 +13,7 @@ type VersionResponse struct {
 func Version(service, version string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(VersionResponse{
+		json.NewEncoder(w).Encode(versionResponse{
 			Service: service,
 			Version: version,
 		})
