@@ -1,28 +1,27 @@
 package server
 
 import (
-	"log/slog"
 	"net/http"
 	"os"
 
-	"github.com/alfattd/category-service/internal/platform/config"
-	"github.com/alfattd/category-service/internal/platform/logger"
-	"github.com/alfattd/category-service/internal/platform/monitor"
+	"github.com/alfattd/category-service/internal/pkg/config"
+	"github.com/alfattd/category-service/internal/pkg/logger"
+	"github.com/alfattd/category-service/internal/pkg/monitor"
 )
 
 func Build() (*config.Config, *http.Server, func()) {
+	log := logger.New()
+
 	cfg := config.Load()
 
-	logger.New()
-
 	if err := cfg.Validate(); err != nil {
-		slog.Error("invalid configuration", "error", err)
+		log.Error("invalid configuration", "error", err)
 		os.Exit(1)
 	}
 
 	monitor.Init()
 
-	srv, cleanup := New(cfg)
+	srv, cleanup := New(cfg, log)
 
 	return cfg, srv, cleanup
 }
