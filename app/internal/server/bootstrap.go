@@ -10,7 +10,7 @@ import (
 	"github.com/alfattd/category-service/internal/platform/monitor"
 )
 
-func Run() (*config.Config, *http.Server) {
+func Build() (*config.Config, *http.Server, func()) {
 	cfg := config.Load()
 
 	logger.New()
@@ -22,7 +22,7 @@ func Run() (*config.Config, *http.Server) {
 
 	monitor.Init()
 
-	srv := New(cfg)
+	srv, cleanup := New(cfg)
 
-	return cfg, srv
+	return cfg, srv, cleanup
 }

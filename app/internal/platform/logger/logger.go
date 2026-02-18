@@ -6,7 +6,7 @@ import (
 )
 
 func New() *slog.Logger {
-	return slog.New(
-		slog.NewJSONHandler(os.Stdout, nil),
-	)
+	l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(l)
+	return l
 }

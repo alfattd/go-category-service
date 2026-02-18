@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
+	"errors"
+	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	"log/slog"
 
 	"github.com/alfattd/category-service/internal/server"
 )
@@ -16,10 +17,11 @@ func main() {
 	log := slog.Default()
 	log.Info("service starting")
 
-	_, srv := server.Run()
+	_, srv, cleanup := server.Build()
+	defer cleanup()
 
 	go func() {
-		if err := srv.ListenAndServe(); err != nil && err.Error() != "http: Server closed" {
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Error("listen error", "error", err)
 			os.Exit(1)
 		}

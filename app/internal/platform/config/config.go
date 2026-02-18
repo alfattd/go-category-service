@@ -18,6 +18,11 @@ type Config struct {
 }
 
 func Load() *Config {
+	sslMode := os.Getenv("DB_SSLMODE")
+	if sslMode == "" {
+		sslMode = "disable"
+	}
+
 	return &Config{
 		AppPort:        os.Getenv("APP_PORT"),
 		ServiceName:    os.Getenv("SERVICE_NAME"),
@@ -30,7 +35,7 @@ func Load() *Config {
 		DBName:     os.Getenv("DB_NAME"),
 		DBUser:     os.Getenv("DB_USER"),
 		DBPassword: os.Getenv("DB_PASSWORD"),
-		DBSSLMode:  os.Getenv("DB_SSLMODE"),
+		DBSSLMode:  sslMode,
 	}
 }
 

@@ -1,21 +1,31 @@
 package database
 
 import (
+	"context"
 	"database/sql"
-	"log"
+	"time"
 
 	_ "github.com/lib/pq"
 )
 
-func NewPostgres(dsn string) *sql.DB {
+func NewPostgres(dsn string) (*sql.DB, error) {
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	if err := db.Ping(); err != nil {
-		log.Fatal(err)
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(5)
+	db.SetConnMaxLifetime(5 * time.Minute)
+	db.SetConnMaxIdleTime(2 * time.Minute)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := db.PingContext(ctx); err != nil {
+		db.Close()
+		return nil, err
 	}
 
-	return db
+	return db, nil
 }

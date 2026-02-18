@@ -1,85 +1,50 @@
 package rabbitmq
 
 import (
-	"encoding/json"
-	"log"
+	"sync"
 
-	"github.com/streadway/amqp"
+	"github.com/alfattd/category-service/internal/domain"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-type CategoryEvent struct {
+type Publisher struct {
+	amqpURL   string
+	conn      *amqp.Connection
+	channel   *amqp.Channel
+	confirmCh chan amqp.Confirmation
+	queue     string
+	mu        sync.Mutex
+}
+
+type categoryEvent struct {
 	ID   string `json:"id"`
 	Name string `json:"name,omitempty"`
 	Type string `json:"type"`
 }
 
-type Publisher struct {
-	conn    *amqp.Connection
-	channel *amqp.Channel
-	queue   string
-}
+var _ domain.CategoryEventPublisher = (*Publisher)(nil)
 
 func NewPublisher(amqpURL, queueName string) (*Publisher, error) {
-	conn, err := amqp.Dial(amqpURL)
-	if err != nil {
-		return nil, err
-	}
-
-	ch, err := conn.Channel()
-	if err != nil {
-		conn.Close()
-		return nil, err
-	}
-
-	_, err = ch.QueueDeclare(
-		queueName,
-		true,
-		false,
-		false,
-		false,
-		nil,
-	)
-	if err != nil {
-		ch.Close()
-		conn.Close()
-		return nil, err
-	}
-
-	return &Publisher{
-		conn:    conn,
-		channel: ch,
+	p := &Publisher{
+		amqpURL: amqpURL,
 		queue:   queueName,
-	}, nil
-}
-
-func (p *Publisher) PublishCategoryEvent(event CategoryEvent) error {
-	body, err := json.Marshal(event)
-	if err != nil {
-		return err
 	}
 
-	err = p.channel.Publish(
-		"",
-		p.queue,
-		false,
-		false,
-		amqp.Publishing{
-			ContentType: "application/json",
-			Body:        body,
-		},
-	)
-	if err != nil {
-		log.Println("failed to publish event:", err)
+	if err := p.connect(); err != nil {
+		return nil, err
 	}
 
-	return err
+	return p, nil
 }
 
 func (p *Publisher) Close() {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
 	if p.channel != nil {
-		p.channel.Close()
+		_ = p.channel.Close()
 	}
 	if p.conn != nil {
-		p.conn.Close()
+		_ = p.conn.Close()
 	}
 }
