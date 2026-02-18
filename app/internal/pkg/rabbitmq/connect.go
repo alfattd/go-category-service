@@ -40,7 +40,8 @@ func (p *Publisher) connect() error {
 
 	p.conn = conn
 	p.channel = ch
-	p.confirmCh = p.channel.NotifyPublish(make(chan amqp.Confirmation, 1)) // register sekali di sini
+
+	p.confirmCh = ch.NotifyPublish(make(chan amqp.Confirmation, 1))
 
 	return nil
 }
@@ -54,4 +55,9 @@ func (p *Publisher) reconnect() error {
 	}
 
 	return p.connect()
+}
+
+func (p *Publisher) isConnected() bool {
+	return p.conn != nil && !p.conn.IsClosed() &&
+		p.channel != nil && !p.channel.IsClosed()
 }

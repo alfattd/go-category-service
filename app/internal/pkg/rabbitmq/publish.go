@@ -13,56 +13,54 @@ func (p *Publisher) PublishCategoryCreated(
 	ctx context.Context,
 	c *domain.Category,
 ) error {
-	event := categoryEvent{
+	return p.publish(ctx, categoryEvent{
 		ID:   c.ID,
 		Name: c.Name,
 		Type: "category_created",
-	}
-
-	return p.publish(ctx, event)
+	})
 }
 
 func (p *Publisher) PublishCategoryUpdated(
 	ctx context.Context,
 	c *domain.Category,
 ) error {
-	event := categoryEvent{
+	return p.publish(ctx, categoryEvent{
 		ID:   c.ID,
 		Name: c.Name,
 		Type: "category_updated",
-	}
-
-	return p.publish(ctx, event)
+	})
 }
 
 func (p *Publisher) PublishCategoryDeleted(
 	ctx context.Context,
 	id string,
 ) error {
-	event := categoryEvent{
+	return p.publish(ctx, categoryEvent{
 		ID:   id,
 		Type: "category_deleted",
-	}
-
-	return p.publish(ctx, event)
+	})
 }
 
 func (p *Publisher) publish(ctx context.Context, event categoryEvent) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	body, err := json.Marshal(event)
 	if err != nil {
 		return fmt.Errorf("failed to marshal event: %w", err)
 	}
 
 	p.mu.Lock()
-	defer p.mu.Unlock()
 
-	if p.channel.IsClosed() {
+	if !p.isConnected() {
 		if err := p.reconnect(); err != nil {
+			p.mu.Unlock()
 			return fmt.Errorf("failed to reconnect: %w", err)
 		}
 	}
 
-	if err := p.channel.PublishWithContext(
+	err = p.channel.PublishWithContext(
 		ctx,
 		"",
 		p.queue,
@@ -73,21 +71,26 @@ func (p *Publisher) publish(ctx context.Context, event categoryEvent) error {
 			Body:         body,
 			DeliveryMode: amqp.Persistent,
 		},
-	); err != nil {
+	)
+
+	confirmCh := p.confirmCh
+
+	p.mu.Unlock()
+
+	if err != nil {
 		return fmt.Errorf("failed to publish event: %w", err)
 	}
 
 	select {
-	case confirm, ok := <-p.confirmCh:
+	case confirm, ok := <-confirmCh:
 		if !ok {
-			return fmt.Errorf("confirm channel closed")
+			return fmt.Errorf("confirm channel closed unexpectedly")
 		}
 		if !confirm.Ack {
-			return fmt.Errorf("message not acknowledged by broker")
+			return fmt.Errorf("message not acknowledged by broker (nack received)")
 		}
+		return nil
 	case <-ctx.Done():
-		return fmt.Errorf("context cancelled while waiting for confirmation: %w", ctx.Err())
+		return fmt.Errorf("context cancelled while waiting for broker confirmation: %w", ctx.Err())
 	}
-
-	return nil
 }
