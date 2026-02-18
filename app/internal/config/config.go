@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+
 	pkgconfig "github.com/alfattd/category-service/internal/pkg/config"
 )
 
@@ -16,10 +18,9 @@ type Config struct {
 	DBSSLMode   string
 }
 
-// internal/config/config.go
 func Load() *Config {
 	return &Config{
-		Base: pkgconfig.LoadBase(), // load generic sekaligus
+		Base: pkgconfig.LoadBase(),
 
 		RabbitMQUrl: pkgconfig.Env("RABBITMQ_URL", ""),
 		DBHost:      pkgconfig.Env("DB_HOST", ""),
@@ -32,7 +33,7 @@ func Load() *Config {
 }
 
 func (c *Config) Validate() error {
-	if err := c.ValidateBase(); err != nil { // validate generic dulu
+	if err := c.ValidateBase(); err != nil {
 		return err
 	}
 
@@ -51,4 +52,11 @@ func (c *Config) Validate() error {
 	}
 
 	return nil
+}
+
+func (c *Config) DBUrl() string {
+	return fmt.Sprintf(
+		"host=%s port=%s dbname=%s user=%s password=%s sslmode=%s",
+		c.DBHost, c.DBPort, c.DBName, c.DBUser, c.DBPassword, c.DBSSLMode,
+	)
 }

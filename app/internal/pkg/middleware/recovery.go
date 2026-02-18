@@ -3,6 +3,8 @@ package middleware
 import (
 	"log/slog"
 	"net/http"
+
+	"github.com/alfattd/category-service/internal/pkg/requestid"
 )
 
 func Recovery(log *slog.Logger) func(http.Handler) http.Handler {
@@ -14,7 +16,7 @@ func Recovery(log *slog.Logger) func(http.Handler) http.Handler {
 						"error", err,
 						"method", r.Method,
 						"path", r.URL.Path,
-						"request_id", RequestIDFromContext(r.Context()),
+						"request_id", requestid.FromContext(r.Context()),
 					)
 					w.WriteHeader(http.StatusInternalServerError)
 				}

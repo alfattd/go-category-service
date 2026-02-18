@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/alfattd/category-service/internal/pkg/config"
+	"github.com/alfattd/category-service/internal/config"
 	"github.com/alfattd/category-service/internal/pkg/logger"
 )
 

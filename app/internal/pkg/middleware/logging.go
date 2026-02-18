@@ -4,6 +4,8 @@ import (
 	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/alfattd/category-service/internal/pkg/requestid"
 )
 
 type responseWriter struct {
@@ -26,7 +28,7 @@ func Logging(log *slog.Logger) func(http.Handler) http.Handler {
 			next.ServeHTTP(wrapped, r)
 
 			log.Info("request completed",
-				"request_id", RequestIDFromContext(r.Context()),
+				"request_id", requestid.FromContext(r.Context()),
 				"method", r.Method,
 				"path", r.URL.Path,
 				"status", wrapped.status,

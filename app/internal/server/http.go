@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/alfattd/category-service/internal/config"
 	"github.com/alfattd/category-service/internal/handler"
-	"github.com/alfattd/category-service/internal/pkg/config"
 	"github.com/alfattd/category-service/internal/pkg/database"
 	"github.com/alfattd/category-service/internal/pkg/middleware"
 	"github.com/alfattd/category-service/internal/pkg/rabbitmq"
