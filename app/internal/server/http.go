@@ -52,15 +52,15 @@ func New(cfg *config.Config, log *slog.Logger) (*http.Server, func()) {
 	mux.HandleFunc("PUT /categories/{id}", categoryHandler.Update)
 	mux.HandleFunc("DELETE /categories/{id}", categoryHandler.Delete)
 
-	handler := MetricsMiddleware(
-		LoggingMiddleware(
-			requestid.Middleware(mux),
+	h := requestid.Middleware(
+		LoggingMiddleware(log,
+			MetricsMiddleware(mux),
 		),
 	)
 
 	srv := &http.Server{
 		Addr:         ":" + cfg.AppPort,
-		Handler:      handler,
+		Handler:      h,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  60 * time.Second,

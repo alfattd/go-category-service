@@ -1,6 +1,7 @@
 package server
 
 import (
+	"log/slog"
 	"net/http"
 	"os"
 
@@ -9,7 +10,7 @@ import (
 	"github.com/alfattd/category-service/internal/pkg/monitor"
 )
 
-func Build() (*config.Config, *http.Server, func()) {
+func Build() (*config.Config, *http.Server, func(), *slog.Logger) {
 	log := logger.New()
 
 	cfg := config.Load()
@@ -23,5 +24,5 @@ func Build() (*config.Config, *http.Server, func()) {
 
 	srv, cleanup := New(cfg, log)
 
-	return cfg, srv, cleanup
+	return cfg, srv, cleanup, log
 }

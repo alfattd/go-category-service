@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,11 +13,10 @@ import (
 )
 
 func main() {
-	log := slog.Default()
-	log.Info("service starting")
-
-	_, srv, cleanup := server.Build()
+	_, srv, cleanup, log := server.Build()
 	defer cleanup()
+
+	log.Info("service starting")
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {

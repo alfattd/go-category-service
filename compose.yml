@@ -19,8 +19,6 @@ services:
       - .env
     ports:
       - "80:${APP_PORT}"
-    depends_on:
-      - postgres
     restart: unless-stopped
     networks:
       - net

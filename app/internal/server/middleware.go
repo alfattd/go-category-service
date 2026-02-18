@@ -17,11 +17,10 @@ func MetricsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func LoggingMiddleware(next http.Handler) http.Handler {
+func LoggingMiddleware(log *slog.Logger, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		rid := requestid.FromContext(r.Context())
-		slog.Info("incoming request",
-			"request_id", rid,
+		log.Info("incoming request",
+			"request_id", requestid.FromContext(r.Context()),
 			"method", r.Method,
 			"path", r.URL.Path,
 		)
