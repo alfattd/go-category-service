@@ -92,7 +92,7 @@ NETWORK=net
 ### 4. Start Services
 
 ```bash
-docker compose up -d
+docker compose up -d --build
 ```
 
 This starts PostgreSQL, runs migrations automatically, then starts the app. The service is now running at `http://localhost:80`.
