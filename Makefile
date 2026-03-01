@@ -1,16 +1,3 @@
-db_url=postgres://$(user):$(password)@localhost:5432/$(name)?sslmode=disable
-
-# ─── Migration ────────────────────────────────────────────────────────────────
-
-migrate-create:
-	migrate create -ext sql -dir postgres/migrations -seq create_$(table)_table
-
-migrate-up:
-	migrate -path postgres/migrations -database "$(db_url)" up
-
-migrate-down:
-	migrate -path postgres/migrations -database "$(db_url)" down 1
-
 # ─── Test ─────────────────────────────────────────────────────────────────────
 
 test-unit:
