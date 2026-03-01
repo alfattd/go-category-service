@@ -270,7 +270,7 @@ func TestRepoList_Success(t *testing.T) {
 	time.Sleep(2 * time.Millisecond)
 	require.NoError(t, repo.Create(ctx, newCategory("Books")))
 
-	result, err := repo.List(ctx)
+	result, err := repo.List(ctx, domain.PaginationParams{Page: 1, Limit: 10})
 	require.NoError(t, err)
 	assert.Len(t, result, 2)
 }
@@ -287,7 +287,7 @@ func TestRepoList_OrderByCreatedAtDesc(t *testing.T) {
 	cat2 := newCategory("Second")
 	require.NoError(t, repo.Create(ctx, cat2))
 
-	result, err := repo.List(ctx)
+	result, err := repo.List(ctx, domain.PaginationParams{Page: 1, Limit: 10})
 	require.NoError(t, err)
 	require.Len(t, result, 2)
 
@@ -295,13 +295,65 @@ func TestRepoList_OrderByCreatedAtDesc(t *testing.T) {
 	assert.Equal(t, "First", result[1].Name)
 }
 
+func TestRepoList_Pagination_ReturnsCorrectPage(t *testing.T) {
+	cleanupTable(t)
+	repo := repository.NewPostgresCategoryRepo(sharedDB)
+	ctx := context.Background()
+
+	names := []string{"A", "B", "C", "D", "E"}
+	for _, name := range names {
+		require.NoError(t, repo.Create(ctx, newCategory(name)))
+		time.Sleep(2 * time.Millisecond)
+	}
+
+	// page 1, limit 2 → should return 2 items (most recent: E, D)
+	page1, err := repo.List(ctx, domain.PaginationParams{Page: 1, Limit: 2})
+	require.NoError(t, err)
+	assert.Len(t, page1, 2)
+	assert.Equal(t, "E", page1[0].Name)
+	assert.Equal(t, "D", page1[1].Name)
+
+	// page 2, limit 2 → should return 2 items (C, B)
+	page2, err := repo.List(ctx, domain.PaginationParams{Page: 2, Limit: 2})
+	require.NoError(t, err)
+	assert.Len(t, page2, 2)
+	assert.Equal(t, "C", page2[0].Name)
+	assert.Equal(t, "B", page2[1].Name)
+
+	// page 3, limit 2 → should return 1 item (A)
+	page3, err := repo.List(ctx, domain.PaginationParams{Page: 3, Limit: 2})
+	require.NoError(t, err)
+	assert.Len(t, page3, 1)
+	assert.Equal(t, "A", page3[0].Name)
+}
+
 func TestRepoList_Empty_ReturnsEmptySlice(t *testing.T) {
 	cleanupTable(t)
 	repo := repository.NewPostgresCategoryRepo(sharedDB)
 	ctx := context.Background()
 
-	result, err := repo.List(ctx)
+	result, err := repo.List(ctx, domain.PaginationParams{Page: 1, Limit: 10})
 	require.NoError(t, err)
 	assert.Empty(t, result)
 	assert.NotNil(t, result)
+}
+
+// ─── Count ────────────────────────────────────────────────────────────────────
+
+func TestRepoCount_ReturnsCorrectTotal(t *testing.T) {
+	cleanupTable(t)
+	repo := repository.NewPostgresCategoryRepo(sharedDB)
+	ctx := context.Background()
+
+	count, err := repo.Count(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, 0, count)
+
+	require.NoError(t, repo.Create(ctx, newCategory("Electronics")))
+	require.NoError(t, repo.Create(ctx, newCategory("Books")))
+	require.NoError(t, repo.Create(ctx, newCategory("Fashion")))
+
+	count, err = repo.Count(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, 3, count)
 }

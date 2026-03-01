@@ -40,10 +40,10 @@ func (m *MockCategoryService) GetByID(ctx context.Context, id string) (*domain.C
 	return args.Get(0).(*domain.Category), args.Error(1)
 }
 
-func (m *MockCategoryService) List(ctx context.Context) ([]*domain.Category, error) {
-	args := m.Called(ctx)
+func (m *MockCategoryService) List(ctx context.Context, p domain.PaginationParams) (*domain.PaginatedResult[*domain.Category], error) {
+	args := m.Called(ctx, p)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).([]*domain.Category), args.Error(1)
+	return args.Get(0).(*domain.PaginatedResult[*domain.Category]), args.Error(1)
 }

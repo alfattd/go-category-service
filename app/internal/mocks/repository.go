@@ -34,10 +34,15 @@ func (m *MockCategoryRepository) GetByID(ctx context.Context, id string) (*domai
 	return args.Get(0).(*domain.Category), args.Error(1)
 }
 
-func (m *MockCategoryRepository) List(ctx context.Context) ([]*domain.Category, error) {
-	args := m.Called(ctx)
+func (m *MockCategoryRepository) List(ctx context.Context, p domain.PaginationParams) ([]*domain.Category, error) {
+	args := m.Called(ctx, p)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).([]*domain.Category), args.Error(1)
+}
+
+func (m *MockCategoryRepository) Count(ctx context.Context) (int, error) {
+	args := m.Called(ctx)
+	return args.Int(0), args.Error(1)
 }

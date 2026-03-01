@@ -33,18 +33,21 @@ func (r *postgresCategoryRepo) GetByID(ctx context.Context, id string) (*domain.
 	return &c, nil
 }
 
-func (r *postgresCategoryRepo) List(ctx context.Context) ([]*domain.Category, error) {
+func (r *postgresCategoryRepo) List(ctx context.Context, p domain.PaginationParams) ([]*domain.Category, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
+
+	offset := (p.Page - 1) * p.Limit
 
 	query := `
 	SELECT id, name, created_at, updated_at
 	FROM categories
 	ORDER BY created_at DESC
+	LIMIT $1 OFFSET $2
 	`
 
-	rows, err := r.db.QueryContext(ctx, query)
+	rows, err := r.db.QueryContext(ctx, query, p.Limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -65,4 +68,18 @@ func (r *postgresCategoryRepo) List(ctx context.Context) ([]*domain.Category, er
 	}
 
 	return result, nil
+}
+
+func (r *postgresCategoryRepo) Count(ctx context.Context) (int, error) {
+	if err := ctx.Err(); err != nil {
+		return 0, err
+	}
+
+	var total int
+	err := r.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM categories`).Scan(&total)
+	if err != nil {
+		return 0, err
+	}
+
+	return total, nil
 }

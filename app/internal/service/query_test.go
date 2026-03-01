@@ -87,44 +87,134 @@ func TestList_Success(t *testing.T) {
 		{ID: "1", Name: "Electronics", CreatedAt: time.Now(), UpdatedAt: time.Now()},
 		{ID: "2", Name: "Books", CreatedAt: time.Now(), UpdatedAt: time.Now()},
 	}
+	p := domain.PaginationParams{Page: 1, Limit: 10}
 
 	repo := new(mocks.MockCategoryRepository)
 	pub := new(mocks.MockCategoryEventPublisher)
 
-	repo.On("List", mock.Anything).Return(categories, nil)
+	repo.On("Count", mock.Anything).Return(2, nil)
+	repo.On("List", mock.Anything, p).Return(categories, nil)
 
 	svc := service.NewCategoryService(repo, pub, testLogger)
-	result, err := svc.List(context.Background())
+	result, err := svc.List(context.Background(), p)
 
 	assert.NoError(t, err)
-	assert.Len(t, result, 2)
+	assert.Len(t, result.Data, 2)
+	assert.Equal(t, 1, result.Page)
+	assert.Equal(t, 10, result.Limit)
+	assert.Equal(t, 2, result.Total)
+	assert.Equal(t, 1, result.TotalPages)
 
 	repo.AssertExpectations(t)
 }
 
-func TestList_Empty_ReturnsEmptySlice(t *testing.T) {
+func TestList_DefaultsAppliedWhenParamsInvalid(t *testing.T) {
+	p := domain.PaginationParams{Page: 0, Limit: 0}
+	expectedP := domain.PaginationParams{Page: 1, Limit: 10}
+
 	repo := new(mocks.MockCategoryRepository)
 	pub := new(mocks.MockCategoryEventPublisher)
 
-	repo.On("List", mock.Anything).Return([]*domain.Category{}, nil)
+	repo.On("Count", mock.Anything).Return(0, nil)
+	repo.On("List", mock.Anything, expectedP).Return([]*domain.Category{}, nil)
 
 	svc := service.NewCategoryService(repo, pub, testLogger)
-	result, err := svc.List(context.Background())
+	result, err := svc.List(context.Background(), p)
 
 	assert.NoError(t, err)
-	assert.Empty(t, result)
+	assert.Equal(t, 1, result.Page)
+	assert.Equal(t, 10, result.Limit)
 
+	repo.AssertExpectations(t)
+}
+
+func TestList_LimitCappedAtMax(t *testing.T) {
+	p := domain.PaginationParams{Page: 1, Limit: 999}
+	expectedP := domain.PaginationParams{Page: 1, Limit: 100}
+
+	repo := new(mocks.MockCategoryRepository)
+	pub := new(mocks.MockCategoryEventPublisher)
+
+	repo.On("Count", mock.Anything).Return(0, nil)
+	repo.On("List", mock.Anything, expectedP).Return([]*domain.Category{}, nil)
+
+	svc := service.NewCategoryService(repo, pub, testLogger)
+	result, err := svc.List(context.Background(), p)
+
+	assert.NoError(t, err)
+	assert.Equal(t, 100, result.Limit)
+
+	repo.AssertExpectations(t)
+}
+
+func TestList_TotalPagesCalculation(t *testing.T) {
+	p := domain.PaginationParams{Page: 1, Limit: 10}
+
+	repo := new(mocks.MockCategoryRepository)
+	pub := new(mocks.MockCategoryEventPublisher)
+
+	repo.On("Count", mock.Anything).Return(95, nil)
+	repo.On("List", mock.Anything, p).Return([]*domain.Category{}, nil)
+
+	svc := service.NewCategoryService(repo, pub, testLogger)
+	result, err := svc.List(context.Background(), p)
+
+	assert.NoError(t, err)
+	assert.Equal(t, 95, result.Total)
+	assert.Equal(t, 10, result.TotalPages)
+
+	repo.AssertExpectations(t)
+}
+
+func TestList_Empty_ReturnsEmptySliceWithMeta(t *testing.T) {
+	p := domain.PaginationParams{Page: 1, Limit: 10}
+
+	repo := new(mocks.MockCategoryRepository)
+	pub := new(mocks.MockCategoryEventPublisher)
+
+	repo.On("Count", mock.Anything).Return(0, nil)
+	repo.On("List", mock.Anything, p).Return([]*domain.Category{}, nil)
+
+	svc := service.NewCategoryService(repo, pub, testLogger)
+	result, err := svc.List(context.Background(), p)
+
+	assert.NoError(t, err)
+	assert.Empty(t, result.Data)
+	assert.Equal(t, 0, result.Total)
+	assert.Equal(t, 1, result.TotalPages)
+
+	repo.AssertExpectations(t)
+}
+
+func TestList_CountError_ReturnsError(t *testing.T) {
+	p := domain.PaginationParams{Page: 1, Limit: 10}
+
+	repo := new(mocks.MockCategoryRepository)
+	pub := new(mocks.MockCategoryEventPublisher)
+
+	repo.On("Count", mock.Anything).Return(0, assert.AnError)
+
+	svc := service.NewCategoryService(repo, pub, testLogger)
+	result, err := svc.List(context.Background(), p)
+
+	assert.Error(t, err)
+	assert.Nil(t, result)
+
+	repo.AssertNotCalled(t, "List")
 	repo.AssertExpectations(t)
 }
 
 func TestList_RepoError_ReturnsError(t *testing.T) {
+	p := domain.PaginationParams{Page: 1, Limit: 10}
+
 	repo := new(mocks.MockCategoryRepository)
 	pub := new(mocks.MockCategoryEventPublisher)
 
-	repo.On("List", mock.Anything).Return(nil, assert.AnError)
+	repo.On("Count", mock.Anything).Return(5, nil)
+	repo.On("List", mock.Anything, p).Return(nil, assert.AnError)
 
 	svc := service.NewCategoryService(repo, pub, testLogger)
-	result, err := svc.List(context.Background())
+	result, err := svc.List(context.Background(), p)
 
 	assert.Error(t, err)
 	assert.Nil(t, result)
