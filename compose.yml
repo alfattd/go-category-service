@@ -1,17 +1,36 @@
 services:
   postgres:
-    image: postgres:15
+    image: postgres:15-alpine
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5432:${DB_PORT}"
     volumes:
       - data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
     networks:
       - net
+
+  migrate:
+    image: migrate/migrate
+    command: >
+      -path /migrations
+      -database postgres://${DB_USER}:${DB_PASSWORD}@postgres:${DB_PORT}/${DB_NAME}?sslmode=${DB_SSLMODE}
+      up
+    volumes:
+      - ./postgres/migrations:/migrations:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - net
+
   app:
     build:
       context: ./app
@@ -19,6 +38,9 @@ services:
       - .env
     ports:
       - "80:${APP_PORT}"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
     networks:
       - net
