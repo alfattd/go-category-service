@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 
 	"github.com/alfattd/category-service/internal/domain"
 	"github.com/alfattd/category-service/internal/mocks"
+	"github.com/alfattd/category-service/internal/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -23,7 +24,7 @@ func TestCreate_Success(t *testing.T) {
 	repo.On("Create", mock.Anything, mock.AnythingOfType("*domain.Category")).Return(nil)
 	pub.On("PublishCategoryCreated", mock.Anything, mock.AnythingOfType("*domain.Category")).Return(nil)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	cat, err := svc.Create(context.Background(), "Electronics")
 
 	assert.NoError(t, err)
@@ -41,7 +42,7 @@ func TestCreate_EmptyName_ReturnsErrInvalid(t *testing.T) {
 	repo := new(mocks.MockCategoryRepository)
 	pub := new(mocks.MockCategoryEventPublisher)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	cat, err := svc.Create(context.Background(), "")
 
 	assert.ErrorIs(t, err, domain.ErrInvalid)
@@ -57,7 +58,7 @@ func TestCreate_RepoError_ReturnsError(t *testing.T) {
 
 	repo.On("Create", mock.Anything, mock.AnythingOfType("*domain.Category")).Return(domain.ErrDuplicate)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	cat, err := svc.Create(context.Background(), "Electronics")
 
 	assert.ErrorIs(t, err, domain.ErrDuplicate)
@@ -74,7 +75,7 @@ func TestCreate_PublishError_StillReturnsCategory(t *testing.T) {
 	repo.On("Create", mock.Anything, mock.AnythingOfType("*domain.Category")).Return(nil)
 	pub.On("PublishCategoryCreated", mock.Anything, mock.AnythingOfType("*domain.Category")).Return(assert.AnError)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	cat, err := svc.Create(context.Background(), "Electronics")
 
 	assert.NoError(t, err)
@@ -96,7 +97,7 @@ func TestUpdate_Success(t *testing.T) {
 	repo.On("Update", mock.Anything, mock.AnythingOfType("*domain.Category")).Return(nil)
 	pub.On("PublishCategoryUpdated", mock.Anything, mock.AnythingOfType("*domain.Category")).Return(nil)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	cat, err := svc.Update(context.Background(), "abc-123", "New Name")
 
 	assert.NoError(t, err)
@@ -111,7 +112,7 @@ func TestUpdate_EmptyID_ReturnsErrInvalid(t *testing.T) {
 	repo := new(mocks.MockCategoryRepository)
 	pub := new(mocks.MockCategoryEventPublisher)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	cat, err := svc.Update(context.Background(), "", "New Name")
 
 	assert.ErrorIs(t, err, domain.ErrInvalid)
@@ -125,7 +126,7 @@ func TestUpdate_EmptyName_ReturnsErrInvalid(t *testing.T) {
 	repo := new(mocks.MockCategoryRepository)
 	pub := new(mocks.MockCategoryEventPublisher)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	cat, err := svc.Update(context.Background(), "abc-123", "")
 
 	assert.ErrorIs(t, err, domain.ErrInvalid)
@@ -140,7 +141,7 @@ func TestUpdate_NotFound_ReturnsErrNotFound(t *testing.T) {
 
 	repo.On("GetByID", mock.Anything, "not-exist").Return(nil, domain.ErrNotFound)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	cat, err := svc.Update(context.Background(), "not-exist", "New Name")
 
 	assert.ErrorIs(t, err, domain.ErrNotFound)
@@ -160,7 +161,7 @@ func TestUpdate_RepoUpdateError_ReturnsError(t *testing.T) {
 	repo.On("GetByID", mock.Anything, "abc-123").Return(existing, nil)
 	repo.On("Update", mock.Anything, mock.AnythingOfType("*domain.Category")).Return(assert.AnError)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	cat, err := svc.Update(context.Background(), "abc-123", "New Name")
 
 	assert.Error(t, err)
@@ -180,7 +181,7 @@ func TestUpdate_PublishError_StillReturnsCategory(t *testing.T) {
 	repo.On("Update", mock.Anything, mock.AnythingOfType("*domain.Category")).Return(nil)
 	pub.On("PublishCategoryUpdated", mock.Anything, mock.AnythingOfType("*domain.Category")).Return(assert.AnError)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	cat, err := svc.Update(context.Background(), "abc-123", "New Name")
 
 	assert.NoError(t, err)
@@ -199,7 +200,7 @@ func TestDelete_Success(t *testing.T) {
 	repo.On("Delete", mock.Anything, "abc-123").Return(nil)
 	pub.On("PublishCategoryDeleted", mock.Anything, "abc-123").Return(nil)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	err := svc.Delete(context.Background(), "abc-123")
 
 	assert.NoError(t, err)
@@ -212,7 +213,7 @@ func TestDelete_EmptyID_ReturnsErrInvalid(t *testing.T) {
 	repo := new(mocks.MockCategoryRepository)
 	pub := new(mocks.MockCategoryEventPublisher)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	err := svc.Delete(context.Background(), "")
 
 	assert.ErrorIs(t, err, domain.ErrInvalid)
@@ -227,7 +228,7 @@ func TestDelete_NotFound_ReturnsErrNotFound(t *testing.T) {
 
 	repo.On("Delete", mock.Anything, "not-exist").Return(domain.ErrNotFound)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	err := svc.Delete(context.Background(), "not-exist")
 
 	assert.ErrorIs(t, err, domain.ErrNotFound)
@@ -243,7 +244,7 @@ func TestDelete_PublishError_StillReturnsNil(t *testing.T) {
 	repo.On("Delete", mock.Anything, "abc-123").Return(nil)
 	pub.On("PublishCategoryDeleted", mock.Anything, "abc-123").Return(assert.AnError)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	err := svc.Delete(context.Background(), "abc-123")
 
 	assert.NoError(t, err)

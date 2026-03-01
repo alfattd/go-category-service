@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/alfattd/category-service/internal/domain"
 	"github.com/alfattd/category-service/internal/mocks"
+	"github.com/alfattd/category-service/internal/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -26,7 +27,7 @@ func TestGetByID_Success(t *testing.T) {
 
 	repo.On("GetByID", mock.Anything, "abc-123").Return(expected, nil)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	cat, err := svc.GetByID(context.Background(), "abc-123")
 
 	assert.NoError(t, err)
@@ -40,7 +41,7 @@ func TestGetByID_EmptyID_ReturnsErrInvalid(t *testing.T) {
 	repo := new(mocks.MockCategoryRepository)
 	pub := new(mocks.MockCategoryEventPublisher)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	cat, err := svc.GetByID(context.Background(), "")
 
 	assert.ErrorIs(t, err, domain.ErrInvalid)
@@ -55,7 +56,7 @@ func TestGetByID_NotFound_ReturnsErrNotFound(t *testing.T) {
 
 	repo.On("GetByID", mock.Anything, "not-exist").Return(nil, domain.ErrNotFound)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	cat, err := svc.GetByID(context.Background(), "not-exist")
 
 	assert.ErrorIs(t, err, domain.ErrNotFound)
@@ -70,7 +71,7 @@ func TestGetByID_RepoError_ReturnsError(t *testing.T) {
 
 	repo.On("GetByID", mock.Anything, "abc-123").Return(nil, assert.AnError)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	cat, err := svc.GetByID(context.Background(), "abc-123")
 
 	assert.Error(t, err)
@@ -92,7 +93,7 @@ func TestList_Success(t *testing.T) {
 
 	repo.On("List", mock.Anything).Return(categories, nil)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	result, err := svc.List(context.Background())
 
 	assert.NoError(t, err)
@@ -107,7 +108,7 @@ func TestList_Empty_ReturnsEmptySlice(t *testing.T) {
 
 	repo.On("List", mock.Anything).Return([]*domain.Category{}, nil)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	result, err := svc.List(context.Background())
 
 	assert.NoError(t, err)
@@ -122,7 +123,7 @@ func TestList_RepoError_ReturnsError(t *testing.T) {
 
 	repo.On("List", mock.Anything).Return(nil, assert.AnError)
 
-	svc := NewCategoryService(repo, pub, testLogger)
+	svc := service.NewCategoryService(repo, pub, testLogger)
 	result, err := svc.List(context.Background())
 
 	assert.Error(t, err)
