@@ -2,16 +2,20 @@ package service
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/alfattd/category-service/internal/domain"
 	"github.com/alfattd/category-service/internal/pkg/requestid"
+	"github.com/alfattd/category-service/internal/validator"
 	"github.com/google/uuid"
 )
 
 func (s *CategoryService) Create(ctx context.Context, name string) (*domain.Category, error) {
-	if name == "" {
-		return nil, domain.ErrInvalid
+	name = strings.TrimSpace(name)
+
+	if errs := validator.CategoryNameValidator(name); errs != nil {
+		return nil, errs
 	}
 
 	now := time.Now()
@@ -39,8 +43,15 @@ func (s *CategoryService) Create(ctx context.Context, name string) (*domain.Cate
 }
 
 func (s *CategoryService) Update(ctx context.Context, id, name string) (*domain.Category, error) {
-	if id == "" || name == "" {
-		return nil, domain.ErrInvalid
+	id = strings.TrimSpace(id)
+	name = strings.TrimSpace(name)
+
+	if id == "" {
+		return nil, &validator.ErrorsValidator{Messages: []string{"id is required"}}
+	}
+
+	if errs := validator.CategoryNameValidator(name); errs != nil {
+		return nil, errs
 	}
 
 	category, err := s.repo.GetByID(ctx, id)
@@ -67,8 +78,10 @@ func (s *CategoryService) Update(ctx context.Context, id, name string) (*domain.
 }
 
 func (s *CategoryService) Delete(ctx context.Context, id string) error {
+	id = strings.TrimSpace(id)
+
 	if id == "" {
-		return domain.ErrInvalid
+		return &validator.ErrorsValidator{Messages: []string{"id is required"}}
 	}
 
 	if err := s.repo.Delete(ctx, id); err != nil {

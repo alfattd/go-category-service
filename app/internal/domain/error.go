@@ -1,6 +1,8 @@
 package domain
 
-import "errors"
+import (
+	"errors"
+)
 
 var (
 	ErrInvalid   = errors.New("data is invalid")

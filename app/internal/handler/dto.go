@@ -37,8 +37,11 @@ type paginatedResponse struct {
 
 type apiResponse struct {
 	Data    any    `json:"data,omitempty"`
-	Error   string `json:"error,omitempty"`
 	Message string `json:"message,omitempty"`
+}
+
+type apiErrorResponse struct {
+	Errors []string `json:"errors"`
 }
 
 func toCategoryResponse(c *domain.Category) categoryResponse {

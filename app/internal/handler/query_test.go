@@ -12,6 +12,7 @@ import (
 	"github.com/alfattd/category-service/internal/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 // ─── GetByID ──────────────────────────────────────────────────────────────────
@@ -58,8 +59,11 @@ func TestHandlerGetByID_NotFound_Returns404(t *testing.T) {
 	assert.Equal(t, http.StatusNotFound, w.Code)
 
 	var resp map[string]any
-	json.NewDecoder(w.Body).Decode(&resp)
-	assert.NotEmpty(t, resp["error"])
+	require.NoError(t, json.NewDecoder(w.Body).Decode(&resp))
+
+	errs, ok := resp["errors"].([]any)
+	require.True(t, ok, "expected 'errors' array in response")
+	assert.NotEmpty(t, errs)
 
 	svc.AssertExpectations(t)
 }

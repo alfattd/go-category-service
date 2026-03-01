@@ -1,7 +1,7 @@
 # ─── Test ─────────────────────────────────────────────────────────────────────
 
 test-unit:
-	cd app && go test ./internal/service/... ./internal/handler/... -v
+	cd app && go test ./internal/validator/... ./internal/service/... ./internal/handler/... -v
 
 test-integration:
 	cd app && go test ./internal/repository/... -v -timeout 120s

@@ -8,7 +8,7 @@ import (
 func (h *CategoryHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req createCategoryRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeJSON(w, http.StatusBadRequest, apiResponse{Error: "invalid request body"})
+		writeJSON(w, http.StatusBadRequest, apiErrorResponse{Errors: []string{"invalid request body"}})
 		return
 	}
 
@@ -29,7 +29,7 @@ func (h *CategoryHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	var req updateCategoryRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeJSON(w, http.StatusBadRequest, apiResponse{Error: "invalid request body"})
+		writeJSON(w, http.StatusBadRequest, apiErrorResponse{Errors: []string{"invalid request body"}})
 		return
 	}
 
