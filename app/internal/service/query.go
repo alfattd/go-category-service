@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/alfattd/category-service/internal/domain"
+	"github.com/alfattd/category-service/internal/validator"
 )
 
 const (
@@ -14,8 +15,8 @@ const (
 )
 
 func (s *CategoryService) GetByID(ctx context.Context, id string) (*domain.Category, error) {
-	if id == "" {
-		return nil, domain.ErrInvalid
+	if errs := validator.CategoryIDValidator(id); errs != nil {
+		return nil, errs
 	}
 
 	return s.repo.GetByID(ctx, id)

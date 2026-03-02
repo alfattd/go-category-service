@@ -46,8 +46,8 @@ func (s *CategoryService) Update(ctx context.Context, id, name string) (*domain.
 	id = strings.TrimSpace(id)
 	name = strings.TrimSpace(name)
 
-	if id == "" {
-		return nil, &validator.ErrorsValidator{Messages: []string{"id is required"}}
+	if errs := validator.CategoryIDValidator(id); errs != nil {
+		return nil, errs
 	}
 
 	if errs := validator.CategoryNameValidator(name); errs != nil {
@@ -80,8 +80,8 @@ func (s *CategoryService) Update(ctx context.Context, id, name string) (*domain.
 func (s *CategoryService) Delete(ctx context.Context, id string) error {
 	id = strings.TrimSpace(id)
 
-	if id == "" {
-		return &validator.ErrorsValidator{Messages: []string{"id is required"}}
+	if errs := validator.CategoryIDValidator(id); errs != nil {
+		return errs
 	}
 
 	if err := s.repo.Delete(ctx, id); err != nil {

@@ -8,8 +8,10 @@ import (
 	"github.com/alfattd/category-service/internal/domain"
 	"github.com/alfattd/category-service/internal/mocks"
 	"github.com/alfattd/category-service/internal/service"
+	"github.com/alfattd/category-service/internal/validator"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 // ─── GetByID ──────────────────────────────────────────────────────────────────
@@ -37,15 +39,19 @@ func TestGetByID_Success(t *testing.T) {
 	repo.AssertExpectations(t)
 }
 
-func TestGetByID_EmptyID_ReturnsErrInvalid(t *testing.T) {
+func TestGetByID_EmptyID_ReturnsValidationError(t *testing.T) {
 	repo := new(mocks.MockCategoryRepository)
 	pub := new(mocks.MockCategoryEventPublisher)
 
 	svc := service.NewCategoryService(repo, pub, testLogger)
 	cat, err := svc.GetByID(context.Background(), "")
 
-	assert.ErrorIs(t, err, domain.ErrInvalid)
+	require.Error(t, err)
 	assert.Nil(t, cat)
+
+	var valErrs *validator.ErrorsValidator
+	assert.ErrorAs(t, err, &valErrs)
+	assert.Contains(t, valErrs.Messages, "id is required")
 
 	repo.AssertNotCalled(t, "GetByID")
 }

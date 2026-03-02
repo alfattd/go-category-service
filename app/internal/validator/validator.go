@@ -62,6 +62,22 @@ func CategoryNameValidator(name string) *ErrorsValidator {
 	return nil
 }
 
+func CategoryIDValidator(id string) *ErrorsValidator {
+	errs := &ErrorsValidator{}
+
+	if id == "" {
+		errs.Add("id is required")
+		return errs
+	}
+
+	if hasOnlyWhitespace(id) {
+		errs.Add("id must not be blank")
+		return errs
+	}
+
+	return nil
+}
+
 func hasForbiddenRunes(s string) bool {
 	for _, r := range s {
 		if forbiddenRunes[r] {

@@ -9,17 +9,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// ─── CategoryNameValidator ────────────────────────────────────────────────────
+
 func TestValidateCategoryName_Valid(t *testing.T) {
 	validNames := []string{
-		"Electronics",
-		"Books & Music",
-		"Home Appliances",
-		"Sports",
-		"A",
-		strings.Repeat("a", 20),
-	}
-
-	validNames = []string{
 		"Electronics",
 		"Home Appliances",
 		"Sports",
@@ -89,6 +82,43 @@ func TestValidateCategoryName_MultipleErrors(t *testing.T) {
 	require.NotNil(t, errs)
 	assert.GreaterOrEqual(t, len(errs.Messages), 2, "expected multiple validation errors")
 }
+
+// ─── CategoryIDValidator ──────────────────────────────────────────────────────
+
+func TestValidateCategoryID_Valid(t *testing.T) {
+	validIDs := []string{
+		"abc-123",
+		"550e8400-e29b-41d4-a716-446655440000",
+		"1",
+	}
+
+	for _, id := range validIDs {
+		t.Run(id, func(t *testing.T) {
+			errs := validator.CategoryIDValidator(id)
+			assert.Nil(t, errs, "expected no errors for id: %q", id)
+		})
+	}
+}
+
+func TestValidateCategoryID_EmptyID(t *testing.T) {
+	errs := validator.CategoryIDValidator("")
+	require.NotNil(t, errs)
+	assert.Contains(t, errs.Messages, "id is required")
+	assert.Len(t, errs.Messages, 1)
+}
+
+func TestValidateCategoryID_WhitespaceOnly(t *testing.T) {
+	cases := []string{"   ", "\t", "\n"}
+	for _, id := range cases {
+		t.Run("whitespace", func(t *testing.T) {
+			errs := validator.CategoryIDValidator(id)
+			require.NotNil(t, errs)
+			assert.Contains(t, errs.Messages, "id must not be blank")
+		})
+	}
+}
+
+// ─── ErrorsValidator ──────────────────────────────────────────────────────────
 
 func TestValidationErrors_Error(t *testing.T) {
 	errs := &validator.ErrorsValidator{}
