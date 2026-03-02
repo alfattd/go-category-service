@@ -23,10 +23,6 @@ func mapPostgresError(err error) error {
 		switch pgErr.Code {
 		case "23505":
 			return domain.ErrDuplicate
-		case "23503":
-			return domain.ErrInvalid
-		case "23502":
-			return domain.ErrInvalid
 		default:
 			return fmt.Errorf("postgres error %s: %w", pgErr.Code, err)
 		}

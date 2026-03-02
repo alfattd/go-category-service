@@ -31,8 +31,6 @@ func writeError(w http.ResponseWriter, err error) {
 	}
 
 	switch {
-	case errors.Is(err, domain.ErrInvalid):
-		writeJSON(w, http.StatusBadRequest, apiErrorResponse{Errors: []string{err.Error()}})
 	case errors.Is(err, domain.ErrNotFound):
 		writeJSON(w, http.StatusNotFound, apiErrorResponse{Errors: []string{err.Error()}})
 	case errors.Is(err, domain.ErrDuplicate):
